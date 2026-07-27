@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual de Engenharia Elétrica — Prancha Técnica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#081b30;
+    --bg-blueprint:#0d2c4e;
+    --bg-panel:#0f335a;
+    --bg-card:#123a63;
+    --grid-line:rgba(179,204,235,0.07);
+    --grid-line-strong:rgba(179,204,235,0.14);
+    --paper:#eef2f7;
+    --paper-dim:#a9bdd6;
+    --paper-faint:#7690b3;
+    --copper:#e3a14b;
+    --copper-dim:#a97a3c;
+    --phosphor:#57d9c4;
+    --phosphor-dim:#3a8f81;
+    --rule:rgba(179,204,235,0.22);
+    --danger:#e0665f;
+    --radius:2px;
+    --font-display:'Rajdhani',sans-serif;
+    --font-body:'IBM Plex Sans',sans-serif;
+    --font-mono:'IBM Plex Mono',monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0/40px 40px,
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0/40px 40px,
+      var(--bg-blueprint);
+    color:var(--paper);
+    font-family:var(--font-body);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a{color:inherit;}
+
+  ::selection{ background:var(--copper); color:var(--bg-deep); }
+
+  /* ---------- Layout shell ---------- */
+  .shell{
+    display:grid;
+    grid-template-columns:272px 1fr;
+    min-height:100vh;
+  }
+  @media (max-width: 900px){
+    .shell{grid-template-columns:1fr;}
+  }
+
+  /* ---------- Sidebar: one-line diagram nav ---------- */
+  .sidebar{
+    position:sticky;
+    top:0;
+    height:100vh;
+    overflow-y:auto;
+    background:linear-gradient(180deg, var(--bg-deep), #071627);
+    border-right:1px solid var(--rule);
+    padding:28px 0 40px;
+    z-index:20;
+  }
+  @media (max-width:900px){
+    .sidebar{position:relative; height:auto; border-right:none; border-bottom:1px solid var(--rule);}
+  }
+
+  .brand{
+    padding:0 22px 22px;
+    border-bottom:1px solid var(--rule);
+    margin-bottom:6px;
+  }
+  .brand .mark{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:.14em;
+    color:var(--phosphor);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .brand .mark::before{
+    content:"";
+    width:8px;height:8px;
+    background:var(--phosphor);
+    display:inline-block;
+    box-shadow:0 0 8px var(--phosphor);
+    animation:blink 2.6s ease-in-out infinite;
+  }
+  @keyframes blink{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
+  .brand h1{
+    font-family:var(--font-display);
+    font-size:20px;
+    font-weight:700;
+    letter-spacing:.02em;
+    text-transform:uppercase;
+    margin:8px 0 0;
+    color:var(--paper);
+  }
+
+  .busbar-wrap{ position:relative; padding-left:34px; margin-top:8px; }
+  .busbar-line{
+    position:absolute;
+    left:22px; top:0; bottom:24px;
+    width:2px;
+    background:linear-gradient(var(--copper-dim), var(--copper-dim) 96%, transparent);
+  }
+  .busbar-line::before{
+    content:"";
+    position:absolute; left:-4px; top:-4px;
+    width:10px;height:10px;
+    border-radius:50%;
+    background:var(--copper);
+    box-shadow:0 0 6px var(--copper);
+  }
+  .earth-symbol{
+    position:absolute; left:16px; bottom:-2px;
+    width:14px;
+  }
+  .earth-symbol div{ height:2px; background:var(--copper-dim); margin-top:3px; }
+  .earth-symbol div:nth-child(1){width:14px;}
+  .earth-symbol div:nth-child(2){width:9px; margin-left:2.5px;}
+  .earth-symbol div:nth-child(3){width:4px; margin-left:5px;}
+
+  .feeder{
+    position:relative;
+    display:block;
+    text-decoration:none;
+    padding:9px 14px 9px 20px;
+    margin-bottom:2px;
+  }
+  .feeder::before{
+    /* branch line from bus to breaker */
+    content:"";
+    position:absolute; left:-12px; top:50%;
+    width:14px; height:2px;
+    background:var(--copper-dim);
+  }
+  .feeder .breaker{
+    position:absolute; left:-19px; top:50%;
+    transform:translateY(-50%);
+    width:9px; height:14px;
+    border:2px solid var(--copper-dim);
+    background:var(--bg-deep);
+    transition:all .2s ease;
+  }
+  .feeder .code{
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    color:var(--paper-faint);
+    letter-spacing:.06em;
+    display:block;
+  }
+  .feeder .label{
+    font-family:var(--font-display);
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:.01em;
+    color:var(--paper-dim);
+    display:block;
+    margin-top:1px;
+    transition:color .2s ease;
+  }
+  .feeder:hover .label{ color:var(--paper); }
+  .feeder:hover .breaker{ border-color:var(--copper); }
+
+  .feeder.active .breaker{
+    border-color:var(--copper);
+    background:var(--copper);
+    box-shadow:0 0 10px var(--copper);
+  }
+  .feeder.active .label{ color:var(--copper); }
+  .feeder.active .code{ color:var(--phosphor); }
+  .feeder.active::after{
+    content:"";
+    position:absolute; left:0; top:0; bottom:0;
+    width:2px; background:var(--copper);
+  }
+
+  .sidebar-foot{
+    padding:18px 22px 0 34px;
+    margin-top:14px;
+    font-family:var(--font-mono);
+    font-size:10px;
+    color:var(--paper-faint);
+    letter-spacing:.04em;
+  }
+
+  /* ---------- Main ---------- */
+  main{ min-width:0; }
+
+  /* Hero / title block */
+  .hero{
+    position:relative;
+    padding:64px 48px 40px;
+    border-bottom:1px solid var(--rule);
+    overflow:hidden;
+  }
+  @media (max-width:640px){ .hero{padding:44px 20px 28px;} }
+
+  .hero-eyebrow{
+    font-family:var(--font-mono);
+    font-size:11.5px;
+    letter-spacing:.16em;
+    color:var(--phosphor);
+    text-transform:uppercase;
+  }
+  .hero h2{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:clamp(34px,5.4vw,64px);
+    line-height:1.02;
+    letter-spacing:.005em;
+    margin:14px 0 16px;
+    color:var(--paper);
+    max-width:16ch;
+  }
+  .hero p.lede{
+    max-width:56ch;
+    color:var(--paper-dim);
+    font-size:16.5px;
+  }
+
+  .hero-trace{
+    position:absolute;
+    right:-40px; top:0;
+    height:100%;
+    width:46%;
+    opacity:.5;
+    pointer-events:none;
+  }
+  @media (max-width:900px){ .hero-trace{display:none;} }
+
+  .trace-path{
+    fill:none;
+    stroke:var(--phosphor-dim);
+    stroke-width:1.6;
+    stroke-dasharray:1400;
+    stroke-dashoffset:1400;
+    animation:draw 2.6s ease forwards .2s;
+  }
+  .trace-path.accent{ stroke:var(--copper-dim); animation-delay:.6s; }
+  @keyframes draw{ to{ stroke-dashoffset:0; } }
+  .trace-node{ fill:var(--bg-deep); stroke:var(--phosphor); stroke-width:1.6; }
+
+  /* Title block, drawing-cartouche style */
+  .titleblock{
+    margin-top:34px;
+    border:1px solid var(--rule);
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    max-width:640px;
+    font-family:var(--font-mono);
+    font-size:11px;
+  }
+  .titleblock div{
+    padding:9px 12px;
+    border-right:1px solid var(--rule);
+    border-top:1px solid var(--rule);
+  }
+  .titleblock div:nth-child(-n+4){ border-top:none; }
+  .titleblock div:nth-child(4n){ border-right:none; }
+  .titleblock span{
+    display:block;
+    color:var(--paper-faint);
+    font-size:9px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    margin-bottom:3px;
+  }
+  .titleblock strong{ color:var(--paper); font-weight:500; }
+
+  /* Search / filter bar */
+  .toolbar{
+    position:sticky;
+    top:0;
+    z-index:10;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:14px 48px;
+    background:rgba(13,44,78,0.86);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--rule);
+  }
+  @media (max-width:640px){ .toolbar{padding:12px 20px; flex-wrap:wrap;} }
+  .toolbar label{
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    letter-spacing:.1em;
+    color:var(--paper-faint);
+    text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .toolbar input{
+    flex:1;
+    max-width:420px;
+    background:var(--bg-panel);
+    border:1px solid var(--rule);
+    color:var(--paper);
+    font-family:var(--font-body);
+    font-size:14px;
+    padding:9px 12px;
+    border-radius:var(--radius);
+    outline:none;
+  }
+  .toolbar input:focus{ border-color:var(--copper); box-shadow:0 0 0 1px var(--copper); }
+  .toolbar .count{
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--phosphor);
+    white-space:nowrap;
+  }
+
+  /* Sections */
+  .topic{
+    padding:56px 48px 12px;
+    border-bottom:1px solid var(--rule);
+    scroll-margin-top:64px;
+  }
+  @media (max-width:640px){ .topic{padding:40px 20px 8px;} }
+
+  .topic-head{
+    display:flex;
+    align-items:baseline;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-bottom:8px;
+  }
+  .topic-head .tag{
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--copper);
+    letter-spacing:.1em;
+    border:1px solid var(--copper-dim);
+    padding:3px 8px;
+  }
+  .topic h3{
+    font-family:var(--font-display);
+    font-size:clamp(24px,3vw,34px);
+    font-weight:700;
+    letter-spacing:.01em;
+    margin:0;
+    color:var(--paper);
+    text-transform:uppercase;
+  }
+  .topic-intro{
+    color:var(--paper-dim);
+    max-width:70ch;
+    margin:10px 0 30px;
+    font-size:15px;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(300px,1fr));
+    gap:16px;
+    margin-bottom:16px;
+  }
+
+  /* Component card = accordion */
+  details.card{
+    background:var(--bg-card);
+    border:1px solid var(--rule);
+    border-left:2px solid var(--copper-dim);
+    padding:0;
+    transition:border-color .2s ease;
+  }
+  details.card[open]{ border-left-color:var(--copper); }
+  details.card summary{
+    list-style:none;
+    cursor:pointer;
+    padding:16px 18px;
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+  }
+  details.card summary::-webkit-details-marker{ display:none; }
+  .card-titles{ min-width:0; }
+  .card-code{
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    color:var(--phosphor);
+    letter-spacing:.08em;
+    display:block;
+    margin-bottom:4px;
+  }
+  .card-title{
+    font-family:var(--font-display);
+    font-size:17.5px;
+    font-weight:600;
+    color:var(--paper);
+    line-height:1.25;
+  }
+  .toggle{
+    flex:none;
+    width:22px;height:22px;
+    border:1px solid var(--rule);
+    display:flex;align-items:center;justify-content:center;
+    position:relative;
+    margin-top:2px;
+  }
+  .toggle::before,.toggle::after{
+    content:"";
+    position:absolute;
+    background:var(--paper-dim);
+  }
+  .toggle::before{ width:10px; height:1.4px; }
+  .toggle::after{ width:1.4px; height:10px; transition:transform .2s ease; }
+  details[open] .toggle::after{ transform:scaleY(0); }
+  details[open] .toggle::before{ background:var(--copper); }
+
+  .card-body{
+    padding:0 18px 20px 18px;
+    color:var(--paper-dim);
+    font-size:14.5px;
+  }
+  .card-body p{ margin:0 0 10px; }
+  .card-body p:last-child{ margin-bottom:0; }
+  .card-body .kw{
+    color:var(--phosphor);
+    font-family:var(--font-mono);
+    font-size:12.5px;
+  }
+
+  .norm-list{
+    list-style:none;
+    margin:0;
+    padding:0;
+    border-top:1px solid var(--rule);
+  }
+  .norm-list li{
+    padding:10px 0;
+    border-bottom:1px solid var(--rule);
+  }
+  .norm-list li:last-child{ border-bottom:none; }
+  .norm-list .norm-code{
+    display:block;
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:.03em;
+    color:var(--copper);
+    margin-bottom:2px;
+  }
+  .norm-list .norm-desc{
+    display:block;
+    color:var(--paper-dim);
+    font-size:13.5px;
+    line-height:1.45;
+  }
+  .norm-list .norm-note{
+    display:block;
+    color:var(--paper-faint);
+    font-size:11.5px;
+    font-style:italic;
+    margin-top:2px;
+  }
+
+  details.hidden{ display:none; }
+
+  .no-results{
+    display:none;
+    padding:40px 0 60px;
+    color:var(--paper-faint);
+    font-family:var(--font-mono);
+    font-size:13px;
+    text-align:center;
+  }
+
+  footer{
+    padding:48px;
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:14px;
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--paper-faint);
+    letter-spacing:.04em;
+  }
+  @media (max-width:640px){ footer{padding:28px 20px;} }
+
+  :focus-visible{ outline:2px solid var(--copper); outline-offset:2px; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ======= SIDEBAR — diagrama unifilar de navegação ======= -->
+  <nav class="sidebar" aria-label="Navegação por seções">
+    <div class="brand">
+      <span class="mark">SISTEMA ENERGIZADO</span>
+      <h1>Manual&nbsp;EE</h1>
+    </div>
+    <div class="busbar-wrap">
+      <div class="busbar-line"></div>
+
+      <a class="feeder" data-target="eletronica" href="#eletronica">
+        <span class="breaker"></span>
+        <span class="code">01</span>
+        <span class="label">Eletrônica</span>
+      </a>
+      <a class="feeder" data-target="eletromagnetismo" href="#eletromagnetismo">
+        <span class="breaker"></span>
+        <span class="code">02</span>
+        <span class="label">Eletromagnetismo</span>
+      </a>
+      <a class="feeder" data-target="protecao" href="#protecao">
+        <span class="breaker"></span>
+        <span class="code">03</span>
+        <span class="label">Proteção Elétrica</span>
+      </a>
+      <a class="feeder" data-target="sep" href="#sep">
+        <span class="breaker"></span>
+        <span class="code">04</span>
+        <span class="label">Sist. Elétrico de Potência</span>
+      </a>
+      <a class="feeder" data-target="subestacoes" href="#subestacoes">
+        <span class="breaker"></span>
+        <span class="code">05</span>
+        <span class="label">Subestações</span>
+      </a>
+      <a class="feeder" data-target="normas" href="#normas">
+        <span class="breaker"></span>
+        <span class="code">06</span>
+        <span class="label">Normas Técnicas</span>
+      </a>
+      <a class="feeder" data-target="maquinas" href="#maquinas">
+        <span class="breaker"></span>
+        <span class="code">07</span>
+        <span class="label">Máquinas Elétricas</span>
+      </a>
+      <a class="feeder" data-target="renovaveis" href="#renovaveis">
+        <span class="breaker"></span>
+        <span class="code">08</span>
+        <span class="label">Renováveis &amp; QEE</span>
+      </a>
+
+      <div class="earth-symbol" aria-hidden="true">
+        <div></div><div></div><div></div>
+      </div>
+    </div>
+    <div class="sidebar-foot">
+      REV. A · SIN 60 Hz · CLASSE&nbsp;EDUC.
+    </div>
+  </nav>
+
+  <!-- ======= MAIN ======= -->
+  <main>
+
+    <header class="hero">
+      <span class="hero-eyebrow">Prancha nº 01 — Documento de referência</span>
+      <h2>Manual de Engenharia Elétrica</h2>
+      <p class="lede">Uma prancha técnica navegável: cada seção é um alimentador do sistema, cada subtópico é um componente que você pode abrir para inspecionar. Da eletrônica de sinal fraco até a subestação de alta tensão.</p>
+
+      <div class="titleblock">
+        <div><span>Disciplina</span><strong>Eng. Elétrica</strong></div>
+        <div><span>Seções</span><strong>08 alimentadores</strong></div>
+        <div><span>Subtópicos</span><strong>34 componentes</strong></div>
+        <div><span>Escala</span><strong>Conceitual</strong></div>
+      </div>
+
+      <svg class="hero-trace" viewBox="0 0 400 420" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <path class="trace-path" d="M20,40 H160 V120 H340 M340,120 V220 H240 V300 H340 M160,120 V260 H60 V380 H300" />
+        <path class="trace-path accent" d="M20,180 H100 V60 H260 V200 H180 V340 H360" />
+        <circle class="trace-node" cx="160" cy="40" r="5"/>
+        <circle class="trace-node" cx="340" cy="220" r="5"/>
+        <circle class="trace-node" cx="240" cy="300" r="5"/>
+        <circle class="trace-node" cx="60" cy="380" r="5"/>
+        <circle class="trace-node" cx="260" cy="60" r="5"/>
+        <circle class="trace-node" cx="180" cy="340" r="5"/>
+      </svg>
+    </header>
+
+    <div class="toolbar">
+      <label for="search">Filtrar</label>
+      <input id="search" type="text" placeholder="Buscar por assunto: relé, transformador, PWM, aterramento…" autocomplete="off">
+      <span class="count" id="resultCount"></span>
+    </div>
+
+    <!-- ================= 01 ELETRÔNICA ================= -->
+    <section class="topic" id="eletronica">
+      <div class="topic-head">
+        <span class="tag">SEC-01</span>
+        <h3>Eletrônica</h3>
+      </div>
+      <p class="topic-intro">Do sinal analógico ao pulso digital: os circuitos que condicionam, convertem e processam energia e informação em escalas que vão de miliwatts a megawatts.</p>
+
+      <div class="grid">
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">01.1 · Conversão estática</span>
+              <span class="card-title">Eletrônica de Potência</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Estuda a conversão e o controle de energia elétrica por meio de semicondutores operando em comutação (diodos, tiristores, IGBTs e MOSFETs), em vez de operação linear. As quatro famílias clássicas de conversores são retificadores (CA-CC), inversores (CC-CA), choppers (CC-CC) e cicloconversores (CA-CA).</p>
+            <p>A técnica de <span class="kw">PWM</span> (modulação por largura de pulso) é o coração do controle moderno, permitindo regular tensão e frequência de saída com alta eficiência. Aplicações típicas incluem inversores de frequência para motores, fontes chaveadas, carregadores de veículos elétricos e inversores de energia solar fotovoltaica.</p>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">01.2 · Lógica binária</span>
+              <span class="card-title">Eletrônica Digital</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Trata da representação e manipulação de informação em níveis discretos de tensão (0 e 1), usando álgebra booleana como base matemática. Portas lógicas (AND, OR, NOT, XOR) combinam-se em circuitos combinacionais e sequenciais, estes últimos com memória, como flip-flops, registradores e contadores.</p>
+            <p>Em nível industrial, essa lógica é implementada em <span class="kw">CLPs</span> (controladores lógico-programáveis), FPGAs e ASICs, formando a espinha dorsal da automação de processos, intertravamentos de segurança e sistemas supervisórios.</p>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">01.3 · Sinais contínuos</span>
+              <span class="card-title">Eletrônica Analógica</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Ocupa-se de sinais que variam continuamente no tempo. O amplificador operacional é o componente central: com realimentação negativa, constrói somadores, comparadores, filtros ativos e amplificadores de instrumentação usados no condicionamento de sinais de sensores (temperatura, corrente, pressão).</p>
+            <p>Filtros passivos e ativos (passa-baixa, passa-alta, passa-faixa) removem ruído e limitam largura de banda antes da conversão analógico-digital, etapa essencial para que sistemas de medição e proteção "enxerguem" o mundo físico com fidelidade.</p>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">01.4 · Controle embarcado</span>
+              <span class="card-title">Microcontroladores e Sistemas Embarcados</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Integram CPU, memória e periféricos (conversores A/D e D/A, temporizadores, PWM, comunicação serial UART/SPI/I2C) em um único chip, permitindo controlar processos com custo e consumo reduzidos.</p>
+            <p>Em engenharia elétrica industrial, microcontroladores executam algoritmos de controle de motores, leitura de sensores em subestações digitais e comunicação em redes de automação, sendo a ponte entre o mundo elétrico de potência e a camada de dados da <span class="kw">IoT industrial</span>.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= 02 ELETROMAGNETISMO ================= -->
+    <section class="topic" id="eletromagnetismo">
+      <div class="topic-head">
+        <span class="tag">SEC-02</span>
+        <h3>Eletromagnetismo</h3>
+      </div>
+      <p class="topic-intro">O alicerce teórico de tudo que conduz, induz ou irradia: campos, forças e as equações que unificam eletricidade, magnetismo e luz.</p>
+
+      <div class="grid">
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">02.1 · Fundamentos</span>
+              <span class="card-title">Campos Elétricos e Magnéticos</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>O campo elétrico descreve a força por unidade de carga em torno de cargas elétricas, regido pela lei de Coulomb, enquanto o campo magnético surge de cargas em movimento (correntes) e é descrito pela lei de Biot-Savart.</p>
+            <p>A força de Lorentz une os dois fenômenos ao descrever a força sobre uma carga em movimento dentro de campos elétrico e magnético simultâneos — princípio que explica desde o funcionamento de motores até o desvio de elétrons em um tubo de raios catódicos.</p>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">02.2 · Formalismo unificado</span>
+              <span class="card-title">Equações de Maxwell</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Quatro equações — lei de Gauss elétrica, lei de Gauss magnética, lei de Faraday e lei de Ampère-Maxwell — descrevem completamente o comportamento clássico de campos eletromagnéticos e sua interação com cargas e correntes.</p>
+            <p>Maxwell mostrou que um campo elétrico variável gera um campo magnético e vice-versa, previsão que levou à existência das ondas eletromagnéticas — a base teórica de rádio, radar, comunicação sem fio e da própria luz visível.</p>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">02.3 · Geração de FEM</span>
+              <span class="card-title">Indução Eletromagnética</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>A lei de Faraday estabelece que uma força eletromotriz é induzida em um circuito sempre que o fluxo magnético que o atravessa varia no tempo. A lei de Lenz determina que a corrente induzida se opõe à variação que a originou, garantindo a conservação de energia.</p>
+            <p>Esse par de leis explica o funcionamento de geradores (variação de fluxo por rotação mecânica) e de transformadores (variação de fluxo por corrente alternada), sendo talvez o princípio mais economicamente relevante de toda a engenharia elétrica.</p>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">02.4 · Analogia elétrica</span>
+              <span class="card-title">Circuitos Magnéticos</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Núcleos ferromagnéticos concentram e conduzem fluxo magnético de forma análoga à condução de corrente em um fio. A força magnetomotriz faz o papel da tensão, o fluxo magnético o papel da corrente, e a relutância — inversamente proporcional à permeabilidade do material — o papel da resistência.</p>
+            <p>Esse modelo simplifica o projeto de transformadores, indutores e máquinas rotativas, permitindo estimar perdas por histerese e correntes parasitas (Foucault) e dimensionar entreferros para controlar a saturação do núcleo.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= 03 PROTEÇÃO ================= -->
+    <section class="topic" id="protecao">
+      <div class="topic-head">
+        <span class="tag">SEC-03</span>
+        <h3>Proteção Elétrica</h3>
+      </div>
+      <p class="topic-intro">A engenharia da falha: detectar, isolar e limitar o dano de um curto-circuito antes que ele se propague pelo sistema.</p>
+
+      <div class="grid">
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">03.1 · Vigilância</span>
+              <span class="card-title">Relés de Proteção</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Relés monitoram grandezas elétricas (corrente, tensão, impedância) e comandam o desligamento de disjuntores diante de uma falha. A padronização ANSI numera as funções: <span class="kw">50/51</span> sobrecorrente instantânea/temporizada, <span class="kw">87</span> diferencial, <span class="kw">21</span> distância e <span class="kw">67</span> direcional.</p>
+            <p>Os relés eletromecânicos deram lugar a relés numéricos (IEDs), que combinam múltiplas funções de proteção, medição, registro de oscilografia e comunicação digital em um único equipamento, elevando a velocidade e a precisão do diagnóstico de falhas.</p>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">03.2 · Filosofia de atuação</span>
+              <span class="card-title">Coordenação e Seletividade</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Coordenar a proteção significa garantir que, diante de uma falta, apenas o dispositivo mais próximo do defeito atue, isolando a menor porção possível do sistema. Isso é obtido ajustando curvas tempo x corrente com margens de tempo entre proteções em série.</p>
+            <p>A seletividade pode ser cronométrica (por atraso de tempo), amperimétrica (por níveis de corrente) ou lógica (por troca de sinais de bloqueio entre relés), sendo esta última a mais rápida e usada em sistemas de transmissão críticos.</p>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">03.3 · Interrupção</span>
+              <span class="card-title">Disjuntores e Fusíveis</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Disjuntores interrompem correntes de curto-circuito extinguindo o arco elétrico em meios como SF6, vácuo ou óleo, sendo capazes de religar automaticamente. Sua capacidade de interrupção é dimensionada pela corrente de curto-circuito prevista no ponto de instalação.</p>
+            <p>Fusíveis, por sua vez, protegem por fusão de um elo calibrado — solução simples, rápida e de baixo custo, amplamente usada em ramais de distribuição e proteção de transformadores de menor porte, embora não sejam reutilizáveis após a atuação.</p>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">03.4 · Segurança da instalação</span>
+              <span class="card-title">Aterramento e SPDA</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>O sistema de aterramento define o caminho de referência de potencial zero e de escoamento de correntes de falta, classificado pelos esquemas <span class="kw">TN, TT e IT</span> conforme a NBR 5410, cada um com implicações distintas para a proteção contra choque elétrico.</p>
+            <p>O SPDA (Sistema de Proteção contra Descargas Atmosféricas) complementa o aterramento captando e conduzindo raios com segurança até o solo, por meio de captores, condutores de descida e um sistema de aterramento dedicado, dimensionado conforme a NBR 5419.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= 04 SEP ================= -->
+    <section class="topic" id="sep">
+      <div class="topic-head">
+        <span class="tag">SEC-04</span>
+        <h3>Sistema Elétrico de Potência</h3>
+      </div>
+      <p class="topic-intro">A cadeia que leva energia da usina à tomada: geração, transmissão e distribuição operando em equilíbrio constante entre oferta e demanda.</p>
+
+      <div class="grid">
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">04.1 · Origem da energia</span>
+              <span class="card-title">Geração de Energia</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Converte fontes primárias — água, combustíveis fósseis, urânio, vento, sol e biomassa — em energia elétrica, majoritariamente por meio de geradores síncronos acionados por turbinas hidráulicas, a vapor ou a gás, ou diretamente por inversores no caso solar.</p>
+            <p>No Brasil, a matriz é predominantemente hidrelétrica e renovável, o que traz vantagens ambientais mas também desafios de despacho, já que a geração eólica e solar são intermitentes e exigem maior flexibilidade das demais fontes para manter o equilíbrio do sistema.</p>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">04.2 · Longa distância</span>
+              <span class="card-title">Transmissão de Energia</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Linhas de extra e ultra-alta tensão (<span class="kw">EAT/UAT</span>) transportam grandes blocos de energia a longas distâncias, elevando a tensão para reduzir perdas ôhmicas por efeito Joule, já que a corrente diminui proporcionalmente ao aumento de tensão para a mesma potência.</p>
+            <p>Sistemas <span class="kw">HVDC</span> (corrente contínua em alta tensão) ganham espaço em interligações muito longas ou entre sistemas assíncronos, reduzindo perdas e permitindo controle preciso de fluxo de potência, enquanto bancos de capacitores e reatores compensam a componente reativa das linhas.</p>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">04.3 · Última milha</span>
+              <span class="card-title">Distribuição de Energia</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Reduz a tensão em subestações abaixadoras e a entrega ao consumidor final por redes primárias (média tensão) e secundárias (baixa tensão), enfrentando desafios de queda de tensão, perdas técnicas e não técnicas, e curtos-circuitos frequentes por exposição a intempéries.</p>
+            <p>As <span class="kw">redes inteligentes (smart grids)</span> incorporam medidores eletrônicos, automação de chaves e sensoriamento remoto para detectar faltas automaticamente, reconfigurar a rede e integrar geração distribuída, como painéis solares residenciais.</p>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">04.4 · Operação em tempo real</span>
+              <span class="card-title">Estabilidade e Confiabilidade</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>A estabilidade de ângulo garante que os geradores síncronos permaneçam em sincronismo após uma perturbação; a estabilidade de tensão evita colapsos progressivos de tensão em áreas com carga pesada; e o controle de frequência mantém o equilíbrio instantâneo entre geração e carga em 60 Hz.</p>
+            <p>No Brasil, o <span class="kw">ONS</span> opera o SIN (Sistema Interligado Nacional) coordenando despacho, reserva girante e ações corretivas para manter esses três pilares dentro de margens seguras, mesmo diante de contingências como perda de linhas ou usinas.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= 05 SUBESTAÇÕES ================= -->
+    <section class="topic" id="subestacoes">
+      <div class="topic-head">
+        <span class="tag">SEC-05</span>
+        <h3>Subestações</h3>
+      </div>
+      <p class="topic-intro">Os nós do sistema elétrico: onde tensão é transformada, fluxo é manobrado e falhas são isoladas.</p>
+
+      <div class="grid">
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">05.1 · Topologia</span>
+              <span class="card-title">Subestações de Alta Tensão</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>O arranjo de barramentos define a flexibilidade operativa e a confiabilidade: barra simples é o mais econômico porém menos flexível, barra dupla permite manutenção sem interrupção total, e o arranjo disjuntor-e-meio oferece máxima confiabilidade para subestações críticas de transmissão.</p>
+            <p>A escolha do arranjo pondera custo de investimento, criticidade da carga atendida e a necessidade de manutenção sem desligamentos, sendo uma das primeiras decisões de projeto de uma subestação de alta ou extra-alta tensão.</p>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">05.2 · Componentes do pátio</span>
+              <span class="card-title">Equipamentos de Subestação</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Transformadores de potência elevam ou abaixam tensão; transformadores de corrente (TCs) e de potencial (TPs) escalam grandezas para níveis seguros de medição e proteção; disjuntores e seccionadoras manobram e isolam circuitos; e para-raios limitam sobretensões de origem atmosférica ou de manobra.</p>
+            <p>Cada equipamento possui ensaios de aceitação e placas de identificação normalizadas, e seu correto dimensionamento térmico e dielétrico é o que garante a operação segura da subestação ao longo de décadas.</p>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">05.3 · Supervisão remota</span>
+              <span class="card-title">Automação e SCADA</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Sistemas digitais de automação substituem fiação de controle ponto a ponto por redes de comunicação, com IEDs trocando dados via protocolo <span class="kw">IEC 61850</span>, padrão que unificou a interoperabilidade entre fabricantes de relés e equipamentos de subestação.</p>
+            <p>O sistema <span class="kw">SCADA</span> centraliza a supervisão e o telecomando de disjuntores e seccionadoras a partir de centros de operação remotos, permitindo reconfiguração da rede e restabelecimento de energia em minutos, em vez de horas.</p>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">05.4 · Ciclo de vida</span>
+              <span class="card-title">Manutenção de Subestações</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>A manutenção preventiva segue calendário fixo independentemente da condição do equipamento; a corretiva atua após a falha; e a preditiva usa dados de condição — como análise de óleo isolante, termografia infravermelha e análise de gases dissolvidos — para antecipar defeitos antes que evoluam para falhas.</p>
+            <p>Essa transição para manutenção baseada em condição reduz custos e desligamentos não programados, sendo hoje apoiada por sensores permanentes e plataformas de monitoramento contínuo de transformadores e disjuntores críticos.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= 06 NORMAS ================= -->
+    <section class="topic" id="normas">
+      <div class="topic-head">
+        <span class="tag">SEC-06</span>
+        <h3>Normas Técnicas</h3>
+      </div>
+      <p class="topic-intro">As regras do jogo: o conjunto de normas brasileiras (ABNT NBR) e regulamentadoras (NR) que cobrem projeto, execução, proteção, máquinas e segurança do trabalho em atividades com eletricidade — organizadas aqui por família, com as normas internacionais de referência que as complementam.</p>
+
+      <div class="grid">
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">06.1 · Por nível de tensão</span>
+              <span class="card-title">Instalações Elétricas</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>As normas de instalação formam a base de todo projeto elétrico, escalonadas conforme o nível de tensão do sistema.</p>
+            <ul class="norm-list">
+              <li><span class="norm-code">NBR 5410</span><span class="norm-desc">Instalações elétricas de baixa tensão — projeto, execução, proteção contra choques e sobrecorrentes, dimensionamento de condutores.</span></li>
+              <li><span class="norm-code">NBR 14039</span><span class="norm-desc">Instalações elétricas de média tensão (1,0 kV a 36,2 kV) — subestações, ramais industriais e redes internas.</span></li>
+              <li><span class="norm-code">NBR IEC 61936-1</span><span class="norm-desc">Instalações elétricas de potência acima de 1 kV CA — critérios para instalações de alta e extra-alta tensão.</span></li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">06.2 · Raios e malha de terra</span>
+              <span class="card-title">Proteção Contra Descargas e Aterramento</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Cobrem desde a proteção externa contra raios até o dimensionamento técnico da malha de terra que dá suporte a toda a instalação.</p>
+            <ul class="norm-list">
+              <li><span class="norm-code">NBR 5419 (Partes 1 a 4)</span><span class="norm-desc">Proteção de estruturas contra descargas atmosféricas (SPDA) — gerenciamento de risco, captores, descidas e proteção de sistemas internos.</span></li>
+              <li><span class="norm-code">NBR 7117-1</span><span class="norm-desc">Parâmetros do solo para projetos de aterramento — medição da resistividade e modelagem geoelétrica.</span></li>
+              <li><span class="norm-code">NBR 15749</span><span class="norm-desc">Medição de resistência de aterramento e de potenciais na superfície do solo em sistemas de aterramento.</span></li>
+              <li><span class="norm-code">NBR 15751</span><span class="norm-desc">Sistemas de aterramento de subestações de energia elétrica acima de 1 kV — requisitos de projeto.</span></li>
+              <li><span class="norm-code">NBR 17140</span><span class="norm-desc">Aterramento de estruturas e dimensionamento de cabos para-raios de linhas de transmissão aéreas.</span></li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">06.3 · Trabalho seguro</span>
+              <span class="card-title">Segurança em Serviços com Eletricidade</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Definem os requisitos mínimos para proteger quem projeta, instala e mantém sistemas elétricos energizados ou desligados.</p>
+            <ul class="norm-list">
+              <li><span class="norm-code">NR-10</span><span class="norm-desc">Norma Regulamentadora do MTE — segurança em instalações e serviços em eletricidade, treinamento, EPI/EPC e procedimentos de trabalho.</span></li>
+              <li><span class="norm-code">NBR 16820</span><span class="norm-desc">Segurança em eletricidade — recomendações e orientações técnicas complementares para trabalho seguro em serviços com eletricidade.</span></li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">06.4 · Equipamentos girantes e estáticos</span>
+              <span class="card-title">Máquinas e Equipamentos Elétricos</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Especificam ensaios, desempenho e características construtivas dos principais equipamentos de conversão e manobra de energia.</p>
+            <ul class="norm-list">
+              <li><span class="norm-code">NBR 5356 (série)</span><span class="norm-desc">Transformadores de potência — especificação, ensaios de rotina, tipo e especiais.</span></li>
+              <li><span class="norm-code">NBR 5440</span><span class="norm-desc">Transformadores para redes aéreas de distribuição — requisitos construtivos e de desempenho.</span></li>
+              <li><span class="norm-code">NBR 7094</span><span class="norm-desc">Máquinas elétricas girantes — motores de indução trifásicos — especificação.</span></li>
+              <li><span class="norm-code">NBR IEC 60034 (série)</span><span class="norm-desc">Máquinas elétricas girantes — características nominais, desempenho e métodos de ensaio.</span></li>
+              <li><span class="norm-code">NBR 5361</span><span class="norm-desc">Disjuntores de baixa tensão — requisitos de fabricação e ensaio.</span></li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">06.5 · Estudos elétricos</span>
+              <span class="card-title">Curto-Circuito e Qualidade de Energia</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Fornecem a base normativa para dimensionar a robustez do sistema diante de falhas e para limitar distorções na forma de onda.</p>
+            <ul class="norm-list">
+              <li><span class="norm-code">NBR IEC 60909 (série)</span><span class="norm-desc">Cálculo de correntes de curto-circuito em sistemas trifásicos de corrente alternada.</span></li>
+              <li><span class="norm-code">NBR IEC 61000 (série)</span><span class="norm-desc">Compatibilidade eletromagnética — limites de emissão harmônica, flutuação de tensão (flicker) e imunidade.</span></li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">06.6 · Geração distribuída</span>
+              <span class="card-title">Sistemas Fotovoltaicos</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Regulam o projeto, os cabos, a conexão à rede e a segurança contra incêndio de instalações solares fotovoltaicas.</p>
+            <ul class="norm-list">
+              <li><span class="norm-code">NBR 16690</span><span class="norm-desc">Instalações elétricas de arranjos fotovoltaicos — requisitos de projeto.</span></li>
+              <li><span class="norm-code">NBR 16274</span><span class="norm-desc">Sistemas fotovoltaicos conectados à rede — documentação, comissionamento, inspeção e desempenho.</span></li>
+              <li><span class="norm-code">NBR 10899</span><span class="norm-desc">Energia solar fotovoltaica — terminologia.</span></li>
+              <li><span class="norm-code">NBR 16612</span><span class="norm-desc">Cabos de potência para sistemas fotovoltaicos, não halogenados, até 1,8 kV CC.</span></li>
+              <li><span class="norm-code">NBR 17193</span><span class="norm-desc">Segurança contra incêndio em instalações fotovoltaicas — requisitos de projeto para uso em edificações.</span></li>
+              <li><span class="norm-code">NBR IEC 61727 / NBR IEC 62116</span><span class="norm-desc">Interface de conexão de inversores FV à rede e ensaio de anti-ilhamento.</span></li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">06.7 · Ambientes específicos</span>
+              <span class="card-title">Iluminação e Instalações Especiais</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Tratam de aplicações elétricas com requisitos próprios de conforto visual, emergência e afluência de pessoas.</p>
+            <ul class="norm-list">
+              <li><span class="norm-code">NBR ISO/CIE 8995-1</span><span class="norm-desc">Iluminância de interiores — níveis mínimos recomendados por atividade e ambiente (norma que sucedeu a antiga NBR 5413).</span></li>
+              <li><span class="norm-code">NBR 10898</span><span class="norm-desc">Sistema de iluminação de emergência — projeto e execução.</span></li>
+              <li><span class="norm-code">NBR 13570</span><span class="norm-desc">Instalações elétricas em locais de afluência de público — requisitos específicos de segurança.</span></li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">06.8 · Linguagem comum</span>
+              <span class="card-title">Simbologia, Terminologia e Cabeamento</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Padronizam a representação gráfica, o vocabulário técnico e a infraestrutura de cabeamento que dão consistência a projetos e documentos.</p>
+            <ul class="norm-list">
+              <li><span class="norm-code">NBR 5444</span><span class="norm-desc">Símbolos gráficos para instalações elétricas prediais.</span></li>
+              <li><span class="norm-code">NBR 5456</span><span class="norm-desc">Eletricidade geral — terminologia.</span></li>
+              <li><span class="norm-code">NBR IEC 60050 (série)</span><span class="norm-desc">Vocabulário eletrotécnico internacional.</span></li>
+              <li><span class="norm-code">NBR 14565</span><span class="norm-desc">Cabeamento estruturado para edifícios comerciais e data centers.</span></li>
+              <li><span class="norm-code">NBR 16415</span><span class="norm-desc">Cabeamento estruturado — caminhos e espaços.</span></li>
+            </ul>
+          </div>
+        </details>
+      </div>
+
+      <p style="font-family:var(--font-mono); font-size:11px; color:var(--paper-faint); margin-top:4px;">// Lista de referência técnica com fins educacionais. Normas são periodicamente revisadas — consulte sempre a edição vigente junto à ABNT.</p>
+    </section>
+
+    <!-- ================= 07 MÁQUINAS ================= -->
+    <section class="topic" id="maquinas">
+      <div class="topic-head">
+        <span class="tag">SEC-07</span>
+        <h3>Máquinas Elétricas</h3>
+      </div>
+      <p class="topic-intro">Os conversores eletromecânicos que giram, transformam e sustentam a rede: motores, geradores e transformadores.</p>
+
+      <div class="grid">
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">07.1 · Sem partes móveis</span>
+              <span class="card-title">Transformadores</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Transferem energia entre circuitos elétricos por indução mútua, alterando o nível de tensão sem alterar a frequência, com relação de transformação dada pela razão entre o número de espiras dos enrolamentos primário e secundário.</p>
+            <p>Ensaios de rotina (curto-circuito, circuito aberto, relação de transformação) verificam perdas, impedância e polaridade, enquanto a ligação estrela-triângulo dos enrolamentos define defasagens angulares importantes para o paralelismo com outros transformadores no sistema.</p>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">07.2 · Conversão eletromecânica</span>
+              <span class="card-title">Motores Elétricos</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>O motor de indução trifásico, robusto e de baixo custo, domina aplicações industriais graças à ausência de contato elétrico no rotor (rotor gaiola de esquilo). Motores síncronos oferecem controle preciso de velocidade e fator de potência; motores CC, embora menos comuns hoje, ainda aparecem em aplicações de controle fino de torque.</p>
+            <p>Partida direta, partida suave (soft-starter) e acionamento por inversor de frequência são as estratégias usuais para limitar a corrente de partida e permitir controle contínuo de velocidade.</p>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">07.3 · Fonte da rede</span>
+              <span class="card-title">Geradores Síncronos</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Convertem energia mecânica em elétrica girando em sincronismo exato com a frequência da rede, sendo a principal fonte de energia elétrica do mundo. O sistema de excitação controla a corrente de campo do rotor, regulando a tensão terminal e a potência reativa fornecida.</p>
+            <p>A curva de capabilidade delimita a região segura de operação em termos de potência ativa e reativa, respeitando limites térmicos do estator, do rotor e de estabilidade, sendo fundamental para o paralelismo seguro com o sistema interligado.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ================= 08 RENOVÁVEIS / QEE ================= -->
+    <section class="topic" id="renovaveis">
+      <div class="topic-head">
+        <span class="tag">SEC-08</span>
+        <h3>Energias Renováveis &amp; Qualidade de Energia</h3>
+      </div>
+      <p class="topic-intro">A fronteira em expansão: fontes limpas se conectando a uma rede que precisa continuar limpa em outro sentido — livre de distorções.</p>
+
+      <div class="grid">
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">08.1 · Conversão fotovoltaica</span>
+              <span class="card-title">Energia Solar Fotovoltaica</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Painéis solares convertem luz diretamente em corrente contínua pelo efeito fotovoltaico em células de silício, sendo esta energia convertida para corrente alternada por inversores que também executam o rastreamento do ponto de máxima potência (MPPT).</p>
+            <p>Na geração distribuída, sistemas conectados à rede de baixa tensão exigem proteção de anti-ilhamento e compensação de energia junto à distribuidora, enquanto grandes usinas centralizadas conectam-se diretamente em média ou alta tensão via subestações elevadoras dedicadas.</p>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">08.2 · Conversão eólica</span>
+              <span class="card-title">Energia Eólica</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Aerogeradores convertem energia cinética do vento em energia mecânica de rotação e, por meio de geradores síncronos ou de indução duplamente alimentados, em energia elétrica, com potência de saída proporcional ao cubo da velocidade do vento até o limite nominal da máquina.</p>
+            <p>A curva de potência caracteriza o desempenho do aerogerador em cada faixa de vento, e a integração de grandes parques eólicos exige estudos de flicker, curtailment e suporte de potência reativa para manter a estabilidade da rede.</p>
+          </div>
+        </details>
+
+        <details class="card">
+          <summary>
+            <div class="card-titles">
+              <span class="card-code">08.3 · Pureza da forma de onda</span>
+              <span class="card-title">Qualidade de Energia Elétrica</span>
+            </div>
+            <span class="toggle"></span>
+          </summary>
+          <div class="card-body">
+            <p>Cargas não lineares — como inversores, retificadores e lâmpadas eletrônicas — injetam correntes harmônicas que distorcem a forma de onda senoidal ideal, sendo quantificadas pela Taxa de Distorção Harmônica (THD) e limitadas por normas de qualidade de energia.</p>
+            <p>Outros fenômenos monitorados incluem afundamentos e elevações de tensão, flicker (cintilação luminosa perceptível) e baixo fator de potência, sendo este último frequentemente corrigido com bancos de capacitores para reduzir perdas e evitar penalidades tarifárias.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <p class="no-results" id="noResults">// nenhum componente corresponde ao filtro — reposicione a sonda de busca</p>
+
+    <footer>
+      <span>MANUAL DE ENGENHARIA ELÉTRICA · PRANCHA DIGITAL</span>
+      <span>08 ALIMENTADORES · 34 COMPONENTES · CONTEÚDO EDUCACIONAL</span>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+  // ---- Scroll-spy: energiza o disjuntor do alimentador ativo ----
+  const feeders = Array.from(document.querySelectorAll('.feeder'));
+  const sections = feeders.map(f => document.getElementById(f.dataset.target)).filter(Boolean);
+
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const id = entry.target.id;
+      const feeder = feeders.find(f => f.dataset.target === id);
+      if (!feeder) return;
+      if (entry.isIntersecting) {
+        feeders.forEach(f => f.classList.remove('active'));
+        feeder.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-15% 0px -70% 0px', threshold: 0 });
+
+  sections.forEach(s => spy.observe(s));
+  if (feeders[0]) feeders[0].classList.add('active');
+
+  // ---- Filtro / busca ----
+  const searchInput = document.getElementById('search');
+  const resultCount = document.getElementById('resultCount');
+  const noResults = document.getElementById('noResults');
+  const allCards = Array.from(document.querySelectorAll('details.card'));
+  const allTopics = Array.from(document.querySelectorAll('.topic'));
+
+  function normalize(str){
+    return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+
+  function applyFilter(){
+    const q = normalize(searchInput.value.trim());
+    let visibleCount = 0;
+
+    allCards.forEach(card => {
+      const text = normalize(card.textContent);
+      const match = q === '' || text.includes(q);
+      card.classList.toggle('hidden', !match);
+      if (match) visibleCount++;
+    });
+
+    allTopics.forEach(topic => {
+      const anyVisible = topic.querySelectorAll('details.card:not(.hidden)').length > 0;
+      topic.style.display = anyVisible ? '' : 'none';
+    });
+
+    if (q === '') {
+      resultCount.textContent = '34 componentes';
+    } else {
+      resultCount.textContent = visibleCount + (visibleCount === 1 ? ' resultado' : ' resultados');
+    }
+    noResults.style.display = (q !== '' && visibleCount === 0) ? 'block' : 'none';
+  }
+
+  searchInput.addEventListener('input', applyFilter);
+  resultCount.textContent = '34 componentes';
+</script>
+
+</body>
+</html>
